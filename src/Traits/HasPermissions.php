@@ -120,17 +120,6 @@ trait HasPermissions
     {
         $permissionClass = $this->getPermissionClass();
 
-        if (is_string($permission)) {
-            if(config('permission.hierarchy.enabled')){
-                $permissions = $permissionClass->whereMatchesWildcardString();
-            }else{
-                $permission = $permissionClass->findByName(
-                    $permission,
-                    $guardName ?? $this->getDefaultGuardName()
-                );
-            }
-        }
-
         if (is_int($permission)) {
             $permission = $permissionClass->findById(
                 $permission,
@@ -138,16 +127,41 @@ trait HasPermissions
             );
         }
 
-        if (!$permission instanceof Permission && empty($permissions)) {
-            throw new PermissionDoesNotExist;
-        }
-
         if(config('permission.hierarchy.enabled')){
-            $permissions = $permissionClass->whereHierarchyQualifies(
-                $permission,
-                $guardName ?? $this->getDefaultGuardName()
-            );
+            $permissions = new Collection();
+
+            if (is_string($permission)) {
+                $permissionsMatched = $permissionClass->whereMatchesWildcardString($permission);
+
+                foreach($permissionsMatched as $permissionMatched){
+                    $permissions->push($permissionClass->whereHierarchyQualifies(
+                        $permissionMatched,
+                        $guardName ?? $this->getDefaultGuardName()
+                    ));
+                }
+
+                $permissions = $permissions->flatten(1)->unique('id');
+            }
+
+            if(!count($permissions)){
+                if (!$permission instanceof Permission) {
+                    throw new PermissionDoesNotExist;
+                }else{
+                    $permissions = [$permission];
+                }
+            }
         }else{
+            if (is_string($permission)) {
+                $permission = $permissionClass->findByName(
+                    $permission,
+                    $guardName ?? $this->getDefaultGuardName()
+                );
+            }
+
+            if (!$permission instanceof Permission) {
+                throw new PermissionDoesNotExist;
+            }
+
             $permissions = [$permission];
         }
 

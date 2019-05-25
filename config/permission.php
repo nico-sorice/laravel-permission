@@ -146,7 +146,7 @@ return [
         /**
          * Whether to enable hierarchy mode or not
          */
-        'enabled' => true,
+        'enabled' => false,
 
         /**
          * Character configuration

@@ -161,6 +161,21 @@ class Permission extends Model implements PermissionContract
         return static::getPermissions()->whereIn('name', $qualifiedNames);
     }
 
+
+    /**
+     * @param string $string
+     * @return Collection
+     */
+    public static function whereMatchesWildcardString(string $string): Collection
+    {
+        $hierarchyWildcard = config('permission.hierarchy.characters.wildcard');
+        $stringToStart = strtok($string, $hierarchyWildcard);
+
+        return static::getPermissions()->filter(function(PermissionContract $permission) use ($stringToStart){
+            return strpos($permission->name, $stringToStart) === 0;
+        });
+    }
+
     /**
      * Get the current cached permissions.
      */
