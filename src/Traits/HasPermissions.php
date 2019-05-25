@@ -121,14 +121,14 @@ trait HasPermissions
         $permissionClass = $this->getPermissionClass();
 
         if (is_string($permission)) {
-            $permission = $permissionClass->findByName(
-                $permission,
-                $guardName ?? $this->getDefaultGuardName()
-            );
-
-            /**
-             * Comodines
-             */
+            if(config('permission.hierarchy.enabled')){
+                $permissions = $permissionClass->whereMatchesWildcardString();
+            }else{
+                $permission = $permissionClass->findByName(
+                    $permission,
+                    $guardName ?? $this->getDefaultGuardName()
+                );
+            }
         }
 
         if (is_int($permission)) {
@@ -138,20 +138,20 @@ trait HasPermissions
             );
         }
 
-        if (! $permission instanceof Permission) {
+        if (!$permission instanceof Permission && empty($permissions)) {
             throw new PermissionDoesNotExist;
         }
 
         if(config('permission.hierarchy.enabled')){
-            $permissionsToCheck = $permissionClass->whereHierarchyQualifies(
+            $permissions = $permissionClass->whereHierarchyQualifies(
                 $permission,
                 $guardName ?? $this->getDefaultGuardName()
             );
         }else{
-            $permissionsToCheck = [$permission];
+            $permissions = [$permission];
         }
 
-        foreach($permissionsToCheck as $permissionToCheck){
+        foreach($permissions as $permissionToCheck){
             if($this->hasDirectPermission($permissionToCheck) || $this->hasPermissionViaRole($permissionToCheck)) {
                 return true;
             }

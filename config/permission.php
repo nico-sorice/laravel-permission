@@ -132,7 +132,7 @@ return [
      * of checking for many permissions, the idea is that when checking for a permission named
      * "users.modify.create" this permission can be granted by either "users.modify.create",
      * "users.modify" or "users", that way you can add more specificity at any point in time
-     * allowing roles to have full access to a part of your application of to a tiny subsection
+     * allowing roles to have full access to a part of your application or to a tiny subsection
      * of it.
      *
      * It also allows you to check for any permission using wildcards, for example to know if
