@@ -137,6 +137,30 @@ class Permission extends Model implements PermissionContract
         return $permission;
     }
 
+
+    /**
+     * @param PermissionContract $permission
+     * @return Collection
+     */
+    public static function whereHierarchyQualifies(PermissionContract $permission): Collection
+    {
+        $hierarchySeparator = config('permission.hierarchy.characters.separator');
+        $qualifiedNames = [];
+
+        $paths = explode($hierarchySeparator, $permission->name);
+
+        foreach($paths as $i => $path)
+        {
+            $filteredPaths = array_filter($paths, function($key) use ($i){
+                return $key <= $i;
+            }, ARRAY_FILTER_USE_KEY);
+
+            $qualifiedNames[] = implode($hierarchySeparator, $filteredPaths);
+        }
+
+        return static::getPermissions()->whereIn('name', $qualifiedNames);
+    }
+
     /**
      * Get the current cached permissions.
      */
