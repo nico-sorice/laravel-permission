@@ -126,4 +126,41 @@ return [
 
         'store' => 'default',
     ],
+
+    /*
+     * Hierarchy mode allows your permissions to have a lot more granularity without the hassle
+     * of checking for many permissions, the idea is that when checking for a permission named
+     * "users.modify.create" this permission can be granted by either "users.modify.create",
+     * "users.modify" or "users", that way you can add more specificity at any point in time
+     * allowing roles to have full access to a part of your application of to a tiny subsection
+     * of it.
+     *
+     * It also allows you to check for any permission using wildcards, for example to know if
+     * the user should see an "edit" button in the companies list, you should check if the user
+     * can do any editing in that company. $user->hasPermissionTo('companies.modify.update*'),
+     * this will return true if the user has permission to "companies.modify.update", "companies.modify.update.name",
+     * "companies.modify.update.tax_id", and so on.
+     */
+    'hierarchy' => [
+
+        /**
+         * Whether to enable hierarchy mode or not
+         */
+        'enabled' => true,
+
+        /**
+         * Character configuration
+         */
+        'characters' => [
+            /**
+             * Wildcard character
+             */
+            'wildcard' => '*',
+
+            /**
+             * Hierarchy separator
+             */
+            'separator' => '.',
+        ]
+    ]
 ];
